@@ -1,0 +1,63 @@
+import alquileres.*
+
+describe "alquileres" {
+	
+	const mesaDelDeptoGrande = new Mesa(alturaPatas = 80, tieneBordeLuminoso = true) 
+	const deptoGrande = new Departamento(
+		superficie = 120, cantidadHabitaciones = 5, barrio = "Hurlingham", 
+		artefactos = #{
+			new EstufaDeCuarzo(), 
+			new AireAcondicionado(esFrioCalor = true, frigorias = 2400),
+			mesaDelDeptoGrande
+		}
+	)
+
+	const aireDelDeptoFresco = new AireAcondicionado(esFrioCalor = false, frigorias = 3000)
+	const mesaDelDeptoFresco = new Mesa(alturaPatas = 25, tieneBordeLuminoso = false)
+	const deptoFresco = new Departamento(
+		superficie = 50, cantidadHabitaciones = 2, barrio = "Villa Tesei", 
+		artefactos = #{aireDelDeptoFresco, mesaDelDeptoFresco}
+	)
+
+	const aireDelDeptoFamilia = new AireAcondicionado(esFrioCalor = true, frigorias = 1000)
+	const mesaDelDeptoFamilia = new Mesa(alturaPatas = 75, tieneBordeLuminoso = false)
+	const deptoFamilia = new Departamento(
+		superficie = 60, cantidadHabitaciones = 4, barrio = "Villa Tesei", 
+		artefactos = #{aireDelDeptoFamilia, mesaDelDeptoFamilia}
+	)
+	
+	const laPrincipal = new Inmobiliaria(deptos = #{deptoFamilia, deptoFresco, deptoGrande})
+	
+	test "depto grande" {
+		assert.that(deptoGrande.esEspacioso())
+		assert.equals(1500+700+600+80, deptoGrande.consumoElectrico())
+		assert.equals(mesaDelDeptoGrande, deptoGrande.accesorioMasAlto())
+		assert.that(deptoGrande.tieneCalefaccion())
+		assert.equals(2, deptoGrande.cantidadArtefactosAltoConsumo())		
+	}
+	
+	test "depto fresco" {
+		assert.that(deptoFresco.esEspacioso())
+		assert.equals(600+750+0, deptoFresco.consumoElectrico())
+		assert.equals(aireDelDeptoFresco, deptoFresco.accesorioMasAlto())
+		assert.notThat(deptoFresco.tieneCalefaccion())		
+		assert.equals(1, deptoFresco.cantidadArtefactosAltoConsumo())		
+	}
+	
+	test "depto familia" {
+		assert.notThat(deptoFamilia.esEspacioso())
+		assert.equals(1200+250+0, deptoFamilia.consumoElectrico())
+		assert.equals(mesaDelDeptoFamilia, deptoFamilia.accesorioMasAlto())
+		assert.that(deptoFamilia.tieneCalefaccion())		
+		assert.equals(0, deptoFamilia.cantidadArtefactosAltoConsumo())		
+	}
+	
+	test "inmobiliaria" {
+		assert.equals(#{deptoGrande, deptoFamilia}, laPrincipal.departamentosFamiliares())
+		assert.equals(#{"Villa Tesei", "Hurlingham"}, laPrincipal.barrios())
+		assert.that(laPrincipal.toleraElInvierno())
+		assert.that(laPrincipal.puedeCertificarBajoConsumo(3000))
+		assert.notThat(laPrincipal.puedeCertificarBajoConsumo(2000))
+	}	
+	
+}
